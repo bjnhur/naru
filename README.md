@@ -94,13 +94,44 @@ python -m pip install "naru-sitegen==0.2.1"
 `naru`, 워크플로 파일 `publish.yml`, 환경 `pypi`를 등록하고 GitHub 저장소에
 같은 이름의 환경을 만듭니다.
 
-버전을 올릴 때는 `pyproject.toml`과 `src/naru/__init__.py`의 버전 및 CLI
-테스트를 함께 갱신하고 테스트를 통과시킵니다. 변경을 기본 브랜치에 반영한
-후 같은 커밋에 `v` 접두사가 붙은 버전 태그를 만들고 push합니다. 예를 들어
-`0.2.1`의 태그는 `v0.2.1`입니다. 태그 push 시 워크플로가 태그와 버전 일치,
-테스트 및 배포 파일을 확인한 후 PyPI에
-게시합니다. 한 번 업로드한 배포 파일은 동일한 이름으로 다시 업로드할 수
-없으므로, 게시 후 변경에는 새 버전이 필요합니다.
+예를 들어 `0.2.2`를 배포하려면 [pyproject.toml](pyproject.toml)의 `version`과
+[src/naru/__init__.py](src/naru/__init__.py)의 `__version__`을 모두 `0.2.2`로
+바꾸고, 배포할 변경을 기본 브랜치에 반영합니다. 같은 버전은 아래 두 방법 중
+하나로만 배포합니다. PyPI는 한 번 사용한 배포 파일 이름을 다시 받지 않습니다.
+
+### Windows에서 수동 배포
+
+저장소 루트에서 Python 3.11 이상으로 만든 가상 환경의 Python을 사용합니다.
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -e ".[dev]" build twine
+.\scripts\release.bat
+```
+
+프롬프트에 `0.2.2`를 입력합니다. [배포 스크립트](scripts/release.py)는 입력값과
+두 파일에 선언된 버전이 일치하는지 확인하고, Ruff와 테스트를 통과한 뒤 wheel과
+소스 배포 파일을 빌드합니다. `twine check --strict`까지 통과한 파일만
+`dist/manual/0.2.2/`에 남으며, 이 단계에서는 업로드하지 않습니다. 같은 버전을
+다시 빌드하려면 기존 출력 폴더를 먼저 옮기거나 삭제하세요.
+
+배포 파일을 확인한 뒤, PyPI에서 `naru-sitegen` 프로젝트로 범위를 제한한 API
+토큰을 발급합니다. 다음 명령을 실행하고 버전을 다시 입력한 뒤 Twine의
+암호 프롬프트에 토큰을 입력합니다. 토큰은 명령행이나 저장소에 적지 않습니다.
+
+```powershell
+.\scripts\release.bat upload
+```
+
+배치 파일 대신 `python scripts/release.py`와 `python scripts/release.py upload`를
+실행해도 됩니다. 수동으로 게시한 버전의 `v0.2.2` 태그는 원격에 push하지 마세요.
+태그를 push하면 아래 자동 배포가 다시 업로드를 시도합니다.
+
+### GitHub Actions로 자동 배포
+
+수동 업로드 대신 배포할 커밋에 `v0.2.2` 태그를 붙여 push합니다. 워크플로가
+태그와 버전 일치, 테스트 및 배포 파일을 확인한 후 PyPI에 게시합니다.
 
 ## 개발 환경
 

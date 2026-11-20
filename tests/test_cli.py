@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import tomllib
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from functools import partial
@@ -53,9 +54,11 @@ class CliTests(unittest.TestCase):
         )
 
     def test_version_option(self) -> None:
+        with (PROJECT_ROOT / "pyproject.toml").open("rb") as config:
+            version = tomllib.load(config)["project"]["version"]
         result = self.run_cli("--version")
         self.assertEqual(result.returncode, 0)
-        self.assertEqual(result.stdout.strip(), "naru 0.2.1")
+        self.assertEqual(result.stdout.strip(), f"naru {version}")
 
     def test_no_arguments_prints_help(self) -> None:
         result = self.run_cli()

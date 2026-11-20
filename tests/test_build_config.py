@@ -950,8 +950,9 @@ class BuildConfigurationTests(unittest.TestCase):
         self.assertNotIn('class="ad-row"', catalog)
         self.assertIn("example.com/python-ssg/", sitemap)
         self.assertIn("<strong>두 개의 별표</strong>", post)
-        self.assertIn("<pre>", post)
-        self.assertIn("greet", post)
+        self.assertRegex(
+            post, r"<pre\b[^>]*>(?:<span></span>)?<code\b[^>]*>[^\n]*greet"
+        )
         self.assertIn("Markdown 기본 문법", blog_category)
         self.assertIn("Naru 소개", blog_category)
         self.assertIn("Python 정적 사이트 생성기(SSG) 모음", bookmark_category)
